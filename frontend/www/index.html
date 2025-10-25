@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>استخراج العروض</title>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .container { max-width: 100%; }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+        
+        .header h1 { font-size: 1.5em; margin-bottom: 5px; }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+            font-size: 14px;
+        }
+        
+        .status.active { display: block; }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.info { background: #d1ecf1; color: #0c5460; }
+        
+        .loading {
+            text-align: center;
+            padding: 15px;
+            display: none;
+        }
+        
+        .loading.active { display: block; }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hidden { display: none; }
+        
+        .image-preview {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .cookies-info {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 استخراج العروض</h1>
+            <p style="font-size: 14px;">Android App v1.0</p>
+        </div>
+
+        <div id="statusMessage" class="status"></div>
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>جاري المعالجة...</p>
+        </div>
+
+        <!-- معلومات الكوكيز -->
+        <div class="card cookies-info">
+            <strong>🍪 ملاحظة:</strong> الكوكيز تُحفظ تلقائياً على جهازك لتسريع العملية في المرات القادمة.
+        </div>
+
+        <!-- نموذج العرض -->
+        <div class="card">
+            <h3 style="margin-bottom: 15px;">📋 بيانات العرض</h3>
+            
+            <div class="form-group">
+                <label>🔗 رابط فيسبوك:</label>
+                <input type="url" id="fbUrl" placeholder="https://www.facebook.com/...">
+            </div>
+
+            <button class="btn btn-primary" onclick="extractDeal()">
+                🔍 استخراج البيانات
+            </button>
+
+            <div id="dealForm" class="hidden" style="margin-top: 15px;">
+                <h4 style="margin-bottom: 10px; color: #28a745;">✅ تم الاستخراج</h4>
+                
+                <div class="form-group">
+                    <label>اسم العرض (عربي):</label>
+                    <input type="text" id="name_ar">
+                </div>
+
+                <div class="form-group">
+                    <label>اسم العرض (إنجليزي):</label>
+                    <input type="text" id="name_en">
+                </div>
+
+                <div class="form-group">
+                    <label>الوصف (عربي):</label>
+                    <textarea id="description_ar"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>الوصف (إنجليزي):</label>
+                    <textarea id="description_en"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>السعر (جنيه):</label>
+                    <input type="number" id="price">
+                </div>
+
+                <div class="form-group">
+                    <label>المطعم:</label>
+                    <select id="store"></select>
+                </div>
+
+                <div class="form-group">
+                    <label>من:</label>
+                    <input type="date" id="validFrom">
+                </div>
+
+                <div class="form-group">
+                    <label>إلى:</label>
+                    <input type="date" id="validTo">
+                </div>
+
+                <div id="imagePreview" class="hidden">
+                    <label>الصورة:</label>
+                    <img id="dealImage" class="image-preview">
+                </div>
+
+                <button class="btn btn-success" onclick="uploadDeal()">
+                    ✅ رفع العرض
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 🔐 رابط Backend - غيّره بعد رفع Backend على Railway
+        const API_URL = 'https://your-backend.railway.app';
+        
+        let currentDeal = null;
+        let stores = [];
+
+        // تحميل المطاعم عند فتح التطبيق
+        window.addEventListener('DOMContentLoaded', async () => {
+            await loadStores();
+            loadCookiesFromStorage();
+        });
+
+        // جلب المطاعم
+        async function loadStores() {
+            try {
+                showStatus('جاري تحميل المطاعم...', 'info');
+                
+                const response = await fetch(`${API_URL}/api/fetch-stores`);
+                const result = await response.json();
+
+                if (result.success) {
+                    stores = result.stores;
+                    
+                    const select = document.getElementById('store');
+                    select.innerHTML = '<option value="">-- اختر مطعم --</option>';
+                    stores.forEach(store => {
+                        const option = document.createElement('option');
+                        option.value = store._id;
+                        option.textContent = store.name;
+                        select.appendChild(option);
+                    });
+                    
+                    hideStatus();
+                } else {
+                    showStatus('❌ فشل تحميل المطاعم', 'error');
+                }
+            } catch (error) {
+                showStatus('❌ خطأ: ' + error.message, 'error');
+            }
+        }
+
+        // استخراج العرض
+        async function extractDeal() {
+            const url = document.getElementById('fbUrl').value.trim();
+            
+            if (!url) {
+                showStatus('⚠️ أدخل رابط فيسبوك', 'error');
+                return;
+            }
+
+            try {
+                showLoading(true);
+                hideStatus();
+
+                const cookies = getCookies();
+
+                const response = await fetch(`${API_URL}/api/extract-fb-data`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, cookies })
+                });
+
+                const result = await response.json();
+                showLoading(false);
+
+                if (result.success) {
+                    currentDeal = result.data;
+                    
+                    document.getElementById('name_ar').value = result.data.name_ar;
+                    document.getElementById('name_en').value = result.data.name_en;
+                    document.getElementById('description_ar').value = result.data.description_ar;
+                    document.getElementById('description_en').value = result.data.description_en;
+                    document.getElementById('price').value = result.data.price;
+                    document.getElementById('validFrom').value = result.data.validFrom;
+                    document.getElementById('validTo').value = result.data.validTo;
+
+                    if (result.data.image_url) {
+                        document.getElementById('dealImage').src = result.data.image_url;
+                        document.getElementById('imagePreview').classList.remove('hidden');
+                    }
+
+                    document.getElementById('dealForm').classList.remove('hidden');
+                    showStatus('✅ تم الاستخراج بنجاح!', 'success');
+                } else {
+                    showStatus('❌ فشل: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showLoading(false);
+                showStatus('❌ خطأ: ' + error.message, 'error');
+            }
+        }
+
+        // رفع العرض
+        async function uploadDeal() {
+            try {
+                const storeId = document.getElementById('store').value;
+                
+                if (!storeId) {
+                    showStatus('⚠️ اختر المطعم', 'error');
+                    return;
+                }
+
+                showLoading(true);
+
+                // 1. رفع الصورة
+                let imageAssetId = null;
+                if (currentDeal.image_base64) {
+                    const imgResponse = await fetch(`${API_URL}/api/upload-image`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ imageBase64: currentDeal.image_base64 })
+                    });
+                    const imgResult = await imgResponse.json();
+                    if (imgResult.success) {
+                        imageAssetId = imgResult.assetId;
+                    }
+                }
+
+                // 2. رفع العرض
+                const dealData = {
+                    name_ar: document.getElementById('name_ar').value,
+                    name_en: document.getElementById('name_en').value,
+                    description_ar: document.getElementById('description_ar').value,
+                    description_en: document.getElementById('description_en').value,
+                    price: document.getElementById('price').value,
+                    slug: currentDeal.slug,
+                    validFrom: document.getElementById('validFrom').value,
+                    validTo: document.getElementById('validTo').value,
+                    store: storeId,
+                    imageAssetId: imageAssetId
+                };
+
+                const response = await fetch(`${API_URL}/api/upload-deal`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ deal: dealData })
+                });
+
+                const result = await response.json();
+                showLoading(false);
+
+                if (result.success) {
+                    showStatus('✅ تم رفع العرض بنجاح!', 'success');
+                    setTimeout(() => {
+                        document.getElementById('dealForm').classList.add('hidden');
+                        document.getElementById('fbUrl').value = '';
+                        currentDeal = null;
+                    }, 2000);
+                } else {
+                    showStatus('❌ فشل الرفع: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showLoading(false);
+                showStatus('❌ خطأ: ' + error.message, 'error');
+            }
+        }
+
+        // حفظ/تحميل الكوكيز
+        function getCookies() {
+            const cookies = localStorage.getItem('fb_cookies');
+            return cookies ? JSON.parse(cookies) : null;
+        }
+
+        function loadCookiesFromStorage() {
+            // يتم تحميل الكوكيز تلقائياً
+        }
+
+        function showStatus(message, type) {
+            const el = document.getElementById('statusMessage');
+            el.textContent = message;
+            el.className = `status ${type} active`;
+        }
+
+        function hideStatus() {
+            document.getElementById('statusMessage').classList.remove('active');
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').classList.toggle('active', show);
+        }
+    </script>
+</body>
+</html>

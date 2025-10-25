@@ -1,0 +1,14 @@
+{
+  "name": "sanity-deals-app",
+  "version": "1.0.0",
+  "description": "Sanity Deals Android App",
+  "scripts": {
+    "build": "echo 'Build complete'",
+    "android": "npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor/core": "^5.5.1",
+    "@capacitor/android": "^5.5.1",
+    "@capacitor/cli": "^5.5.1"
+  }
+}
